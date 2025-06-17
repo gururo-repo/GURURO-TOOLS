@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run dev --workspace=landing",
-    "build": "npm run build:simple",
+    "build": "node build-vercel.js",
     "build:simple": "npm run build:landing && npm run build:jobnest && npm run build:resume-refiner && npm run organize:dist",
     "build:advanced": "node build.js",
     "build:landing": "npm run build --workspace=landing",

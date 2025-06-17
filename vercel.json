@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run build:simple",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/jobnest/api/:path*",

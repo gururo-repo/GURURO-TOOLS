@@ -62,8 +62,10 @@ function safeBuild(appName, appPath) {
 safeBuild('Landing Page', 'apps/landing');
 
 // Copy landing page to root of dist
-cpSync('dist/landing', 'dist', { recursive: true });
-rmSync('dist/landing', { recursive: true, force: true });
+if (existsSync('dist/landing')) {
+  cpSync('dist/landing', 'dist', { recursive: true });
+  rmSync('dist/landing', { recursive: true, force: true });
+}
 
 // Build JobNest
 safeBuild('JobNest', 'apps/jobnest');
@@ -72,7 +74,21 @@ safeBuild('JobNest', 'apps/jobnest');
 safeBuild('Resume Refiner', 'apps/resume-refiner');
 
 console.log('✅ Build complete! All apps built to dist/ directory');
-console.log('📁 Structure:');
+
+// Debug: List what's actually in the dist directory
+try {
+  const { readdirSync } = require('fs');
+  console.log('📁 Actual dist/ contents:');
+  const distContents = readdirSync('dist', { withFileTypes: true });
+  distContents.forEach(item => {
+    const type = item.isDirectory() ? '📁' : '📄';
+    console.log(`  ${type} ${item.name}`);
+  });
+} catch (error) {
+  console.log('❌ Could not read dist directory:', error.message);
+}
+
+console.log('📁 Expected structure:');
 console.log('  dist/');
 console.log('  ├── index.html (landing page)');
 console.log('  ├── jobnest/');
