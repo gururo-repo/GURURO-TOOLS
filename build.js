@@ -27,9 +27,27 @@ function safeBuild(appName, appPath) {
     console.error(`❌ Build failed for ${appName}:`, error.message);
     console.log(`🔄 Trying to fix dependencies for ${appName}...`);
 
-    // Try to install the specific missing dependency
+    // Try to install platform-specific rollup dependencies
     try {
-      execSync('npm install @rollup/rollup-win32-x64-msvc', { stdio: 'inherit' });
+      const platform = process.platform;
+      const arch = process.arch;
+
+      let rollupPackage = '';
+      if (platform === 'win32' && arch === 'x64') {
+        rollupPackage = '@rollup/rollup-win32-x64-msvc';
+      } else if (platform === 'linux' && arch === 'x64') {
+        rollupPackage = '@rollup/rollup-linux-x64-gnu';
+      } else if (platform === 'darwin' && arch === 'x64') {
+        rollupPackage = '@rollup/rollup-darwin-x64';
+      } else if (platform === 'darwin' && arch === 'arm64') {
+        rollupPackage = '@rollup/rollup-darwin-arm64';
+      }
+
+      if (rollupPackage) {
+        console.log(`Installing ${rollupPackage} for ${platform}-${arch}...`);
+        execSync(`npm install ${rollupPackage}`, { stdio: 'inherit' });
+      }
+
       execSync('npm run build', { stdio: 'inherit' });
     } catch (retryError) {
       console.error(`❌ Retry failed for ${appName}:`, retryError.message);
