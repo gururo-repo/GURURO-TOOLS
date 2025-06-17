@@ -17,9 +17,24 @@ mkdirSync('dist', { recursive: true });
 console.log('📦 Installing dependencies for landing page...');
 try {
   process.chdir('apps/landing');
+  console.log('📍 Current directory:', process.cwd());
+  console.log('📄 Package.json exists:', existsSync('package.json'));
+
   execSync('npm install', { stdio: 'inherit' });
+
+  // Check available scripts
+  console.log('📋 Available scripts:');
+  execSync('npm run', { stdio: 'inherit' });
+
   console.log('📦 Building landing page...');
-  execSync('npm run build:app', { stdio: 'inherit' });
+  // Try build:app first, fallback to build if needed
+  try {
+    execSync('npm run build:app', { stdio: 'inherit' });
+  } catch (buildError) {
+    console.log('⚠️ build:app failed, trying build...');
+    execSync('npm run build', { stdio: 'inherit' });
+  }
+
   process.chdir('../..');
 
   // Copy landing page files to root of dist
