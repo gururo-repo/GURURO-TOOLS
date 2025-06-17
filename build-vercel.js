@@ -4,6 +4,8 @@ import { execSync } from 'child_process';
 import { existsSync, mkdirSync, cpSync, rmSync, readdirSync } from 'fs';
 
 console.log('🚀 Starting Vercel build process...');
+console.log('📍 Current working directory:', process.cwd());
+console.log('📁 Directory contents:', readdirSync('.'));
 
 // Clean dist directory
 if (existsSync('dist')) {
@@ -11,13 +13,15 @@ if (existsSync('dist')) {
 }
 mkdirSync('dist', { recursive: true });
 
-// Build each app individually
-console.log('📦 Building landing page...');
+// Install dependencies and build each app individually
+console.log('📦 Installing dependencies for landing page...');
 try {
   process.chdir('apps/landing');
+  execSync('npm install', { stdio: 'inherit' });
+  console.log('📦 Building landing page...');
   execSync('npm run build', { stdio: 'inherit' });
   process.chdir('../..');
-  
+
   // Copy landing page files to root of dist
   if (existsSync('dist/landing')) {
     const landingFiles = readdirSync('dist/landing');
@@ -31,9 +35,11 @@ try {
   process.exit(1);
 }
 
-console.log('📦 Building JobNest...');
+console.log('📦 Installing dependencies for JobNest...');
 try {
   process.chdir('apps/jobnest');
+  execSync('npm install', { stdio: 'inherit' });
+  console.log('📦 Building JobNest...');
   execSync('npm run build', { stdio: 'inherit' });
   process.chdir('../..');
 } catch (error) {
@@ -41,9 +47,11 @@ try {
   process.exit(1);
 }
 
-console.log('📦 Building Resume Refiner...');
+console.log('📦 Installing dependencies for Resume Refiner...');
 try {
   process.chdir('apps/resume-refiner');
+  execSync('npm install', { stdio: 'inherit' });
+  console.log('📦 Building Resume Refiner...');
   execSync('npm run build', { stdio: 'inherit' });
   process.chdir('../..');
 } catch (error) {

@@ -4,22 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run dev --workspace=landing",
     "build": "node build-vercel.js",
-    "build:simple": "npm run build:landing && npm run build:jobnest && npm run build:resume-refiner && npm run organize:dist",
-    "build:advanced": "node build.js",
-    "build:landing": "npm run build --workspace=landing",
-    "build:jobnest": "npm run build --workspace=jobnest",
-    "build:resume-refiner": "npm run build --workspace=resume-refiner",
-    "organize:dist": "node -e \"const fs=require('fs');if(fs.existsSync('dist/landing')){const files=fs.readdirSync('dist/landing');files.forEach(f=>fs.renameSync('dist/landing/'+f,'dist/'+f));fs.rmdirSync('dist/landing')}\"",
-    "preview": "npm run preview --workspace=landing",
-    "install:all": "npm install && npm install --workspace=landing && npm install --workspace=jobnest && npm install --workspace=resume-refiner"
+    "dev": "cd apps/landing && npm run dev",
+    "preview": "cd apps/landing && npm run preview"
   },
-  "workspaces": [
-    "apps/landing",
-    "apps/jobnest", 
-    "apps/resume-refiner"
-  ],
   "devDependencies": {
     "npm-run-all": "^4.1.5"
   }
