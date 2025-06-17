@@ -1,9 +1,9 @@
 import axios from 'axios'
 
-// FIXED: Updated to match your actual backend URL
+// API URL configuration for different environments
 const API_BASE_URL = import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD
-    ? 'https://resume-refiner-ai-backend.onrender.com/api'
+    ? '/resume-refiner/api'  // Use Vercel proxy in production
     : 'http://localhost:5000/api')
 
 console.log('API Base URL:', API_BASE_URL) // Debug log

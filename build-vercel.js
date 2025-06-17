@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { existsSync, mkdirSync, cpSync, rmSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, readdirSync } from 'fs';
 
 console.log('🚀 Starting Vercel build process...');
 console.log('📍 Current working directory:', process.cwd());
@@ -22,29 +22,11 @@ try {
 
   execSync('npm install', { stdio: 'inherit' });
 
-  // Check available scripts
-  console.log('📋 Available scripts:');
-  execSync('npm run', { stdio: 'inherit' });
-
   console.log('📦 Building landing page...');
-  // Try build:app first, fallback to build if needed
-  try {
-    execSync('npm run build:app', { stdio: 'inherit' });
-  } catch (buildError) {
-    console.log('⚠️ build:app failed, trying build...');
-    execSync('npm run build', { stdio: 'inherit' });
-  }
+  // Landing page builds directly to dist root
+  execSync('npm run build', { stdio: 'inherit' });
 
   process.chdir('../..');
-
-  // Copy landing page files to root of dist
-  if (existsSync('dist/landing')) {
-    const landingFiles = readdirSync('dist/landing');
-    landingFiles.forEach(file => {
-      cpSync(`dist/landing/${file}`, `dist/${file}`, { recursive: true });
-    });
-    rmSync('dist/landing', { recursive: true, force: true });
-  }
 } catch (error) {
   console.error('❌ Landing page build failed:', error.message);
   process.exit(1);
@@ -53,9 +35,12 @@ try {
 console.log('📦 Installing dependencies for JobNest...');
 try {
   process.chdir('apps/jobnest');
+  console.log('📍 Current directory:', process.cwd());
+  console.log('📄 Package.json exists:', existsSync('package.json'));
+
   execSync('npm install', { stdio: 'inherit' });
   console.log('📦 Building JobNest...');
-  execSync('npm run build:app', { stdio: 'inherit' });
+  execSync('npm run build', { stdio: 'inherit' });
   process.chdir('../..');
 } catch (error) {
   console.error('❌ JobNest build failed:', error.message);
@@ -65,9 +50,12 @@ try {
 console.log('📦 Installing dependencies for Resume Refiner...');
 try {
   process.chdir('apps/resume-refiner');
+  console.log('📍 Current directory:', process.cwd());
+  console.log('📄 Package.json exists:', existsSync('package.json'));
+
   execSync('npm install', { stdio: 'inherit' });
   console.log('📦 Building Resume Refiner...');
-  execSync('npm run build:app', { stdio: 'inherit' });
+  execSync('npm run build', { stdio: 'inherit' });
   process.chdir('../..');
 } catch (error) {
   console.error('❌ Resume Refiner build failed:', error.message);

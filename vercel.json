@@ -1,5 +1,6 @@
 {
   "outputDirectory": "dist",
+  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/jobnest/api/:path*",
@@ -32,7 +33,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "https://tools.gururo.com"
         },
         {
           "key": "Access-Control-Allow-Methods",
