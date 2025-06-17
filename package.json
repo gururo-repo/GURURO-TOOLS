@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "node build-vercel.js",
+    "build": "echo '🚀 MAIN BUILD SCRIPT RUNNING' && node build-vercel.js",
     "dev": "cd apps/landing && npm run dev",
     "preview": "cd apps/landing && npm run preview"
   },

@@ -19,7 +19,7 @@ try {
   process.chdir('apps/landing');
   execSync('npm install', { stdio: 'inherit' });
   console.log('📦 Building landing page...');
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync('npm run build:app', { stdio: 'inherit' });
   process.chdir('../..');
 
   // Copy landing page files to root of dist
@@ -40,7 +40,7 @@ try {
   process.chdir('apps/jobnest');
   execSync('npm install', { stdio: 'inherit' });
   console.log('📦 Building JobNest...');
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync('npm run build:app', { stdio: 'inherit' });
   process.chdir('../..');
 } catch (error) {
   console.error('❌ JobNest build failed:', error.message);
@@ -52,7 +52,7 @@ try {
   process.chdir('apps/resume-refiner');
   execSync('npm install', { stdio: 'inherit' });
   console.log('📦 Building Resume Refiner...');
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync('npm run build:app', { stdio: 'inherit' });
   process.chdir('../..');
 } catch (error) {
   console.error('❌ Resume Refiner build failed:', error.message);
