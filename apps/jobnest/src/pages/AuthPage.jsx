@@ -46,7 +46,7 @@ const AuthPage = () => {
 
       if (storedCodeVerifier) {
         // Exchange the code for tokens
-        api.post('/api/auth/google-token', {
+        api.post('/auth/google-token', {
           code: code,
           code_verifier: storedCodeVerifier,
           redirect_uri: window.location.origin + '/jobnest/auth'
@@ -96,7 +96,7 @@ const AuthPage = () => {
         throw new Error('Passwords do not match');
       }
 
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const endpoint = isLogin ? '/auth/login' : '/auth/register';
       const payload = isLogin
         ? { email: formData.email, password: formData.password }
         : { name: formData.name, email: formData.email, password: formData.password };
@@ -131,7 +131,7 @@ const AuthPage = () => {
       console.log('Google response:', codeResponse); // Debug log
 
       // Exchange the code for tokens
-      const tokenResponse = await api.post('/api/auth/google-token', {
+      const tokenResponse = await api.post('/auth/google-token', {
         code: codeResponse.code,
         code_verifier: codeVerifier,
         redirect_uri: window.location.origin + '/jobnest/auth'

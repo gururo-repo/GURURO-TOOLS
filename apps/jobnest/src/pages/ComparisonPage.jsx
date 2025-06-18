@@ -48,7 +48,7 @@ const ComparisonPage = () => {
         const savedComparisonInputs = localStorage.getItem('comparisonInputs');
 
         // Fetch user profile data
-        const userRes = await api.get('/api/users/profile', {
+        const userRes = await api.get('/users/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -129,7 +129,7 @@ const ComparisonPage = () => {
 
       console.log('Sending comparison request with data:', requestData);
 
-      const response = await api.post('/api/industry-insights/comparison', requestData, {
+      const response = await api.post('/industry-insights/comparison', requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

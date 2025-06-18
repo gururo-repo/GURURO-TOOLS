@@ -139,8 +139,8 @@ const OnboardingForm = () => {
 
       console.log('Sending profile data:', profileData);
 
-      // Update user profile - use the correct API path with /api prefix
-      const profileResponse = await api.put('/api/users/profile', profileData, {
+      // Update user profile
+      const profileResponse = await api.put('/users/profile', profileData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -150,8 +150,8 @@ const OnboardingForm = () => {
       console.log('Profile updated successfully:', profileResponse.data);
 
       if (profileResponse.data) {
-        // Generate insights with the same data and correct API path
-        const insightResponse = await api.post('/api/industry-insights/generate', {
+        // Generate insights with the same data
+        const insightResponse = await api.post('/industry-insights/generate', {
           industry: profileData.subIndustry || profileData.industry,
           experience: parseInt(profileData.experience),
           skills: profileData.skills,

@@ -81,13 +81,13 @@ function IndustryInsightsPage() {
       if (forceRefresh) {
         try {
           // Get user profile data to use for regenerating insights
-          const userRes = await api.get("/api/users/profile", {
+          const userRes = await api.get("/users/profile", {
             headers: { Authorization: `Bearer ${token}` }
           });
 
           // Generate new insights with the latest profile data
           try {
-            await api.post('/api/industry-insights/generate', {
+            await api.post('/industry-insights/generate', {
               industry: userRes.data.subIndustry || userRes.data.industry,
               experience: parseInt(userRes.data.experience),
               skills: userRes.data.skills,

@@ -137,7 +137,7 @@ const CompetencyQuiz = () => {
   
       console.log('Quiz Submission Data:', JSON.stringify(quizSubmissionData, null, 2));
   
-      const response = await api.post('/api/quiz/submit', quizSubmissionData)
+      const response = await api.post('/quiz/submit', quizSubmissionData)
       const result = response.data
   
       navigate("/competency-test/results", {
