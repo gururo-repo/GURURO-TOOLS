@@ -110,6 +110,12 @@ const AuthPage = () => {
       handleAuthSuccess(data);
     } catch (error) {
       console.error('Auth error:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
 
       // Get more specific error message if available
       const errorMessage =
@@ -117,7 +123,12 @@ const AuthPage = () => {
         error.message ||
         'Failed to authenticate. Please try again.';
 
-      setError(errorMessage);
+      // Show more detailed error for debugging
+      const detailedError = error.response?.status
+        ? `${errorMessage} (Status: ${error.response.status})`
+        : errorMessage;
+
+      setError(detailedError);
     } finally {
       setLoading(false);
     }

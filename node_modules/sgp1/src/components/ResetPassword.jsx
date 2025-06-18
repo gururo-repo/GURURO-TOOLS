@@ -83,7 +83,7 @@ const ResetPassword = () => {
       console.log('Password payload:', { token, password: formData.password.substring(0, 3) + '...' });
 
       // Make the API request using axios
-      const response = await api.post('/api/auth/reset-password', {
+      const response = await api.post('/auth/reset-password', {
         token,
         password: formData.password
       });

@@ -37,8 +37,8 @@ const ProfileEdit = () => {
           return;
         }
 
-        // Use the correct API path with /api prefix
-        const response = await api.get('/api/users/profile', {
+        // Fetch user profile
+        const response = await api.get('/users/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -120,7 +120,7 @@ const ProfileEdit = () => {
       const token = localStorage.getItem('token');
 
       // First, update the user profile
-      const profileResponse = await api.put('/api/users/profile', formData, {
+      const profileResponse = await api.put('/users/profile', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

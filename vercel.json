@@ -4,10 +4,6 @@
   "buildCommand": "npm run build",
   "rewrites": [
     {
-      "source": "/jobnest/api/(.*)",
-      "destination": "https://gururo-ai-powered-career-guidance.onrender.com/api/$1"
-    },
-    {
       "source": "/resume-refiner/api/:path*",
       "destination": "https://resume-refiner-ai-backend.onrender.com/api/:path*"
     },
