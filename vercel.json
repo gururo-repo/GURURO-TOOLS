@@ -4,11 +4,19 @@
   "rewrites": [
     {
       "source": "/jobnest/api/:path*",
-      "destination": "https://gururo-ai-powered-career-guidance.onrender.com/:path*"
+      "destination": "https://gururo-ai-powered-career-guidance.onrender.com/api/:path*"
     },
     {
       "source": "/resume-refiner/api/:path*",
       "destination": "https://resume-refiner-ai-backend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/jobnest/assets/:path*",
+      "destination": "/jobnest/assets/:path*"
+    },
+    {
+      "source": "/resume-refiner/assets/:path*",
+      "destination": "/resume-refiner/assets/:path*"
     },
     {
       "source": "/jobnest/:path*",
