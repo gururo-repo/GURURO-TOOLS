@@ -3,7 +3,8 @@ import axios from 'axios';
 
 // Create an Axios instance with default configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ||
+  baseURL: import.meta.env.VITE_JOBNEST_API_URL ||
+    import.meta.env.VITE_API_URL ||
     (import.meta.env.PROD
       ? '/jobnest/api'  // Use Vercel proxy in production
       : 'http://localhost:8000'),
