@@ -19,11 +19,67 @@
       "destination": "/resume-refiner/assets/:path*"
     },
     {
-      "source": "/jobnest/:path*",
+      "source": "/jobnest",
       "destination": "/jobnest/index.html"
     },
     {
-      "source": "/jobnest",
+      "source": "/jobnest/auth",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/forgot-password",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/reset-password/:token",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/onboarding",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/profile/edit",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/industry-insights",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/comparison",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/resume-generator",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/competency-test",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/competency-test/quiz/:categoryId",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/competency-test/results",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/jobnest/dashboard/industry-insights",
+      "destination": "/jobnest/index.html"
+    },
+    {
+      "source": "/resume-refiner",
+      "destination": "/resume-refiner/index.html"
+    },
+    {
+      "source": "/resume-refiner/analyzer",
+      "destination": "/resume-refiner/index.html"
+    },
+    {
+      "source": "/jobnest/:path*",
       "destination": "/jobnest/index.html"
     },
     {
@@ -31,8 +87,8 @@
       "destination": "/resume-refiner/index.html"
     },
     {
-      "source": "/resume-refiner",
-      "destination": "/resume-refiner/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
