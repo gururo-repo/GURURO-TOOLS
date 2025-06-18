@@ -20,7 +20,7 @@ const ForgotPassword = () => {
 
     try {
       // We'll attempt the API call
-      await api.post('/api/auth/forgot-password', { email });
+      await api.post('/auth/forgot-password', { email });
 
       // Even if there's an error (user doesn't exist), we show success for security
       setSuccess(true);
