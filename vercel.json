@@ -4,8 +4,8 @@
   "buildCommand": "npm run build",
   "rewrites": [
     {
-      "source": "/jobnest/api/:path*",
-      "destination": "https://gururo-ai-powered-career-guidance.onrender.com/api/:path*"
+      "source": "/jobnest/api/(.*)",
+      "destination": "https://gururo-ai-powered-career-guidance.onrender.com/api/$1"
     },
     {
       "source": "/resume-refiner/api/:path*",
@@ -20,11 +20,11 @@
       "destination": "/resume-refiner/assets/:path*"
     },
     {
-      "source": "/jobnest",
+      "source": "/jobnest/auth(.*)",
       "destination": "/jobnest/index.html"
     },
     {
-      "source": "/jobnest/auth",
+      "source": "/jobnest",
       "destination": "/jobnest/index.html"
     },
     {
