@@ -20,11 +20,25 @@ try {
   console.log('📍 Current directory:', process.cwd());
   console.log('📄 Package.json exists:', existsSync('package.json'));
 
-  execSync('npm install', { stdio: 'inherit' });
+  // Install dependencies including devDependencies
+  execSync('npm install --include=dev', { stdio: 'inherit' });
+
+  // Verify vite is available
+  try {
+    execSync('npx vite --version', { stdio: 'inherit' });
+  } catch (viteError) {
+    console.log('⚠️ Vite not found, trying to install globally...');
+    execSync('npm install -g vite', { stdio: 'inherit' });
+  }
 
   console.log('📦 Building landing page...');
-  // Landing page builds directly to dist root
-  execSync('npm run build', { stdio: 'inherit' });
+  // Try multiple build approaches
+  try {
+    execSync('npm run build', { stdio: 'inherit' });
+  } catch (buildError) {
+    console.log('⚠️ npm run build failed, trying npx vite build...');
+    execSync('npx vite build', { stdio: 'inherit' });
+  }
 
   process.chdir('../..');
 } catch (error) {
@@ -38,9 +52,9 @@ try {
   console.log('📍 Current directory:', process.cwd());
   console.log('📄 Package.json exists:', existsSync('package.json'));
 
-  execSync('npm install', { stdio: 'inherit' });
+  execSync('npm install --include=dev', { stdio: 'inherit' });
   console.log('📦 Building JobNest...');
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync('npx vite build --outDir ../../dist/jobnest', { stdio: 'inherit' });
   process.chdir('../..');
 } catch (error) {
   console.error('❌ JobNest build failed:', error.message);
@@ -53,9 +67,9 @@ try {
   console.log('📍 Current directory:', process.cwd());
   console.log('📄 Package.json exists:', existsSync('package.json'));
 
-  execSync('npm install', { stdio: 'inherit' });
+  execSync('npm install --include=dev', { stdio: 'inherit' });
   console.log('📦 Building Resume Refiner...');
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync('npx vite build --outDir ../../dist/resume-refiner', { stdio: 'inherit' });
   process.chdir('../..');
 } catch (error) {
   console.error('❌ Resume Refiner build failed:', error.message);
