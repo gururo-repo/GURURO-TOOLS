@@ -10,7 +10,6 @@ import {
   FaUser,
   FaLightbulb,
   FaBriefcase,
-  FaGraduationCap,
   FaChartLine,
   FaMapMarkerAlt,
   FaExchangeAlt
@@ -21,11 +20,10 @@ import CitySalaryRanges from "../components/charts/CitySalaryRanges";
 import { useEffect, useState } from "react";
 import api from "../lib/axios";
 import TopCompaniesTable from "../components/tables/TopCompaniesTable";
-import RecommendedCoursesTable from "../components/tables/RecommendedCoursesTable";
 import InsightCard from "../components/cards/InsightCard";
 import ActionCard from "../components/cards/ActionCard";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const NextActionsSection = ({ nextActions }) => (
   <div className="mt-8">
@@ -62,6 +60,7 @@ function IndustryInsightsPage() {
   const [showWelcomeBack, setShowWelcomeBack] = useState(false);
   // Removed zipCode and location filtering
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Function to fetch insights data
   const fetchInsights = async (forceRefresh = false) => {
@@ -74,27 +73,46 @@ function IndustryInsightsPage() {
         return;
       }
 
-      // Get industry insights
-      const params = {};
+      // Get user profile data first
+      const userRes = await api.get("/users/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Check if we need to force refresh based on profile changes
+      const storedUserData = JSON.parse(localStorage.getItem('userData') || '{}');
+      const profileChanged = storedUserData.country !== userRes.data.country ||
+                           storedUserData.industry !== userRes.data.industry ||
+                           storedUserData.subIndustry !== userRes.data.subIndustry;
+
+      if (profileChanged) {
+        console.log('🔄 Profile changes detected, forcing insights refresh');
+        forceRefresh = true;
+
+        // Clear cached data
+        sessionStorage.removeItem('industryInsights');
+        sessionStorage.removeItem('insightData');
+      }
+
+      // Get industry insights with cache busting if needed
+      const params = forceRefresh ? { t: new Date().getTime(), clearCache: true } : {};
 
       // Only regenerate insights if forceRefresh is true
       if (forceRefresh) {
         try {
-          // Get user profile data to use for regenerating insights
-          const userRes = await api.get("/users/profile", {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
           // Generate new insights with the latest profile data
+          const timestamp = new Date().getTime();
+
           try {
-            await api.post('/industry-insights/generate', {
+            await api.post(`/industry-insights/generate?t=${timestamp}&clearCache=true`, {
               industry: userRes.data.subIndustry || userRes.data.industry,
               experience: parseInt(userRes.data.experience),
               skills: userRes.data.skills,
               country: userRes.data.country,
               salaryExpectation: userRes.data.salaryExpectation,
               isIndianData: userRes.data.country.toLowerCase().includes('india'),
-              forceRefresh: true
+              forceRefresh: true,
+              clearCache: true,
+              profileUpdateTimestamp: timestamp
             }, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -102,9 +120,9 @@ function IndustryInsightsPage() {
               }
             });
 
-            console.log("Insights regenerated with latest profile data");
+            console.log("✅ Insights regenerated with latest profile data");
           } catch (error) {
-            console.error("Failed to generate real-time insights from Gemini AI:", error.response?.data?.message || error.message);
+            console.error("❌ Failed to generate real-time insights from Gemini AI:", error.response?.data?.message || error.message);
             // Show a more specific error message but continue to fetch existing insights
           }
         } catch (regenerateErr) {
@@ -114,11 +132,58 @@ function IndustryInsightsPage() {
       }
 
       // Now fetch the insights (which should be the newly generated ones if forceRefresh was true)
-      const insightRes = await api.get("/api/industry-insights/user", {
+      const insightRes = await api.get("/industry-insights/user", {
         params,
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log("Industry insights loaded:", insightRes.data);
+
+      // Validate that the insights match the current user profile
+      if (insightRes.data && userRes.data.country) {
+        const isIndianCountry = userRes.data.country.toLowerCase().includes('india');
+        const hasIndianCities = insightRes.data.citySalaryData?.some(city =>
+          ['Bangalore', 'Mumbai', 'Delhi', 'Noida', 'Pune', 'Chennai', 'Hyderabad'].includes(city.city)
+        );
+
+        if (!isIndianCountry && hasIndianCities) {
+          console.warn('⚠️ Insights data mismatch detected - showing Indian cities for non-Indian country');
+          console.warn('User country:', userRes.data.country);
+          console.warn('Cities in data:', insightRes.data.citySalaryData?.map(c => c.city));
+
+          // Force regenerate insights with cache clearing
+          try {
+            const timestamp = new Date().getTime();
+            await api.post(`/industry-insights/generate?t=${timestamp}&clearCache=true&forceClear=true`, {
+              industry: userRes.data.subIndustry || userRes.data.industry,
+              experience: parseInt(userRes.data.experience),
+              skills: userRes.data.skills,
+              country: userRes.data.country,
+              salaryExpectation: userRes.data.salaryExpectation,
+              isIndianData: isIndianCountry,
+              forceRefresh: true,
+              clearCache: true,
+              forceClear: true
+            }, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+
+            // Fetch insights again
+            const newInsightRes = await api.get("/industry-insights/user", {
+              params: { t: timestamp, clearCache: true },
+              headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setInsightData(newInsightRes.data);
+            console.log("✅ Insights corrected after mismatch detection");
+            return;
+          } catch (retryError) {
+            console.error("Failed to correct insights data:", retryError);
+          }
+        }
+      }
 
       // Check if we have city salary data
       if (!insightRes.data.citySalaryData || insightRes.data.citySalaryData.length === 0) {
@@ -148,7 +213,7 @@ function IndustryInsightsPage() {
         }
 
         // Get user profile data
-        const userRes = await api.get("/api/users/profile", {
+        const userRes = await api.get("/users/profile", {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserData(userRes.data);
@@ -158,6 +223,44 @@ function IndustryInsightsPage() {
         if (!userRes.data.industry) {
           navigate('/onboarding');
           return;
+        }
+
+        // Check if we have fresh insights from profile update
+        const hasFreshInsights = location.state?.freshInsights ||
+                               location.state?.profileUpdated ||
+                               sessionStorage.getItem('industryInsights');
+
+        console.log('🔍 Checking for fresh insights:', {
+          hasFreshInsights,
+          locationState: location.state,
+          sessionStorage: !!sessionStorage.getItem('industryInsights')
+        });
+
+        // If we have fresh insights from profile update, use them directly
+        if (hasFreshInsights && sessionStorage.getItem('industryInsights')) {
+          try {
+            const cachedInsights = JSON.parse(sessionStorage.getItem('industryInsights'));
+            console.log('✅ Using fresh insights from session storage:', cachedInsights);
+            setInsightData(cachedInsights.data);
+            setShowWelcomeBack(true);
+
+            // Clear the navigation state
+            if (location.state) {
+              window.history.replaceState({}, document.title);
+            }
+
+            // Update the previous user data record
+            localStorage.setItem('previousUserData', JSON.stringify({
+              email: userRes.data.email,
+              lastLogin: new Date().toISOString()
+            }));
+
+            setLoading(false);
+            return; // Exit early since we have fresh data
+          } catch (e) {
+            console.error('Error parsing cached insights:', e);
+            // Fall through to fetch insights normally
+          }
         }
 
         // For returning users, show a welcome back message
@@ -186,7 +289,7 @@ function IndustryInsightsPage() {
 
     // We're removing the automatic refresh on window focus to prevent unnecessary refreshes
     // Instead, we'll add a refresh button for users to manually refresh insights when needed
-  }, [navigate]);
+  }, [navigate, location.state]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";

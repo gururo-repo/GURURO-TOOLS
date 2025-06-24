@@ -65,7 +65,7 @@ const CompetencyTestUI = () => {
     const fetchAssessmentHistory = async () => {
       try {
         setLoading(true)
-        const response = await api.get('/assessment/history')
+        const response = await api.get('/quiz/assessments')
         const history = response.data
         setAssessmentHistory(history)
         setLoading(false)

@@ -65,20 +65,6 @@ const Header = () => {
               >
                 Analyzer
               </Link>
-              <Link
-                to="/features"
-                className="text-gray-300 hover:text-cyan-400 transition-colors duration-200 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Features
-              </Link>
-              <Link
-                to="/analyzer"
-                className="btn-primary w-fit"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Get Started
-              </Link>
             </nav>
           </div>
         )}

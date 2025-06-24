@@ -2,13 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Code, Users, Briefcase } from "lucide-react"
+import { Code, Users, Briefcase, AlertCircle, Loader } from "lucide-react"
+import api from "../../lib/axios"
 
 const CompetencyCategories = () => {
   const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedSubIndustry, setSelectedSubIndustry] = useState(null)
   const [subIndustries, setSubIndustries] = useState([])
+  const [availableQuizzes, setAvailableQuizzes] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
   // Predefined category to sub-industries mapping
   const categorySubIndustries = {
     technical: [
@@ -60,14 +65,67 @@ const CompetencyCategories = () => {
     },
   ]
 
+  // Fetch available quiz combinations on component mount
+  useEffect(() => {
+    const fetchAvailableQuizzes = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          navigate('/auth');
+          return;
+        }
+
+        const response = await api.get('/quiz/available', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        setAvailableQuizzes(response.data);
+        console.log('Available quizzes loaded:', response.data);
+      } catch (error) {
+        console.error('Failed to fetch available quizzes:', error);
+
+        // If the endpoint doesn't exist, fall back to showing all options
+        if (error.response?.status === 404) {
+          console.log('Available quizzes endpoint not found, showing all options');
+          setError('Quiz availability check not available. Some combinations may not work.');
+        } else {
+          setError('Failed to load quiz options. Please try again later.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAvailableQuizzes();
+  }, [navigate]);
+
   const handleCategorySelect = (category) => {
     setSelectedCategory(category)
     // Reset sub-industry when category changes
     setSelectedSubIndustry(null)
-    
+
     // Set sub-industries based on selected category
     if (category) {
-      setSubIndustries(categorySubIndustries[category.id] || [])
+      // If we have available quizzes data, filter by what's actually available
+      if (availableQuizzes.length > 0) {
+        const availableForCategory = availableQuizzes
+          .filter(quiz => quiz.category.toLowerCase() === category.id.toLowerCase())
+          .map(quiz => quiz.subIndustry);
+
+        if (availableForCategory.length > 0) {
+          setSubIndustries(availableForCategory);
+        } else {
+          // Fallback to predefined list if no available quizzes for this category
+          setSubIndustries(categorySubIndustries[category.id] || []);
+        }
+      } else {
+        // Fallback to predefined list if no available quizzes data
+        setSubIndustries(categorySubIndustries[category.id] || []);
+      }
     }
   }
 
@@ -92,12 +150,30 @@ const CompetencyCategories = () => {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-gray-200 flex flex-col items-center justify-center">
+        <Loader className="animate-spin text-cyan-400 mx-auto mb-4" size={40} />
+        <p className="text-xl">Loading quiz categories...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-gray-200 p-6 pt-20">
       <div className="max-w-7xl mx-auto">
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-cyan-400 mb-2">Competency Assessment</h1>
           <p className="text-cyan-100">Select a category and specific area to assess your skills</p>
+
+          {error && (
+            <div className="mt-4 p-4 bg-yellow-900/30 border border-yellow-600 rounded-lg">
+              <div className="flex items-center text-yellow-300">
+                <AlertCircle className="mr-2" size={20} />
+                <span>{error}</span>
+              </div>
+            </div>
+          )}
         </div>
         
 

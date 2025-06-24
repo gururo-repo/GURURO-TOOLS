@@ -195,42 +195,7 @@ export default function ResumeBuilder() {
                 </h1>
                 <p className="text-cyan-400/80">Create a professional resume in minutes</p>
               </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={generatePDF}
-                  disabled={isGenerating || !previewContent}
-                  className="flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-800 to-cyan-700 hover:from-cyan-700 hover:to-cyan-600 text-white disabled:opacity-50 transition-colors shadow-md"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4 mr-2" />
-                      Download PDF
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={onSave}
-                  disabled={isSaving || !previewContent}
-                  className="flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white disabled:opacity-50 transition-colors shadow-md"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Resume
-                    </>
-                  )}
-                </button>
-              </div>
+              
             </div>
           </div>
 

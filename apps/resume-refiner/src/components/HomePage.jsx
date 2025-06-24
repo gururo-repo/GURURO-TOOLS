@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Zap, ArrowRight, Brain, Target, TrendingUp, Upload, FileText, Sparkles } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
 
 const HomePage = () => {
   const features = [
@@ -102,40 +101,37 @@ const HomePage = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 px-4 w-full">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-cyan-100">
+      <div className="mobile-section w-full">
+        <div className="mobile-container max-w-7xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+            <h2 className="mobile-heading font-bold mb-4 text-cyan-100">
               Features That Set Us Apart
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-cyan-50">
+            <p className="mobile-text sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto text-cyan-50 leading-relaxed">
               Our AI-powered platform helps you navigate your career journey with confidence and precision.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => {
+          <div className="mobile-grid">
+            {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card
+                <div
                   key={feature.title}
-                  className="border transform duration-500 shadow-lg rounded-2xl hover:bg-transparent
-                    hover:scale-105 hover:shadow-2xl hover:shadow-cyan-400 hover:border-cyan-400 hover:border-2 h-auto w-auto"
+                  className="glass-card group transform duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-400/50 hover:border-cyan-400/50 h-auto min-h-[280px] sm:min-h-[300px] w-auto p-4 sm:p-6 lg:p-8 text-center flex flex-col items-center justify-center"
                 >
-                  <CardContent className="pt-6 text-center flex flex-col items-center p-8">
-                    <div className="flex justify-center mb-6">
-                      <div className="p-4 rounded-full bg-cyan-500/20 border border-cyan-500/30 group-hover:bg-cyan-500/30 transition-all duration-300">
-                        <Icon className="h-12 w-12 text-cyan-400" />
-                      </div>
+                  <div className="flex justify-center mb-4 sm:mb-6">
+                    <div className="p-3 sm:p-4 rounded-full bg-cyan-500/20 border border-cyan-500/30 group-hover:bg-cyan-500/30 transition-all duration-300">
+                      <Icon className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-cyan-400" />
                     </div>
-                    <h3 className="text-xl font-semibold text-cyan-100 mb-4">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-cyan-50 leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-cyan-100 mb-3 sm:mb-4 text-center">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-cyan-50/80 leading-relaxed text-center">
+                    {feature.description}
+                  </p>
+                </div>
               );
             })}
           </div>
@@ -155,7 +151,7 @@ const HomePage = () => {
           </div>
 
           <div className="space-y-8">
-            {steps.map((step, index) => {
+            {steps.map((step) => {
               const Icon = step.icon;
               return (
                 <div
@@ -186,50 +182,8 @@ const HomePage = () => {
       </div>
 
       {/* Stats Section */}
-      <div className="py-20 px-4 w-full">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center glass-card p-8 hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-cyan-400 mb-2">95%</div>
-              <div className="text-lg text-white mb-2">ATS Pass Rate</div>
-              <div className="text-gray-300">Resumes optimized with our AI</div>
-            </div>
-            <div className="text-center glass-card p-8 hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-cyan-400 mb-2">3x</div>
-              <div className="text-lg text-white mb-2">More Interviews</div>
-              <div className="text-gray-300">Average increase for our users</div>
-            </div>
-            <div className="text-center glass-card p-8 hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-cyan-400 mb-2">50K+</div>
-              <div className="text-lg text-white mb-2">Resumes Analyzed</div>
-              <div className="text-gray-300">Trusted by job seekers worldwide</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="py-20 px-4 text-center w-full">
-        <div className="max-w-4xl mx-auto glass-card p-12 hover:scale-105 transition-all duration-300">
-          <div className="w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-8 border border-cyan-500/30">
-            <Zap className="h-10 w-10 text-cyan-400" />
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-            Ready to Optimize Your Resume?
-          </h2>
-          <p className="text-lg mb-8 leading-relaxed text-gray-300 max-w-2xl mx-auto">
-            Join thousands of job seekers who have improved their resumes and landed their dream jobs with our AI-powered platform.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             <Link
-                          to="/analyzer"
-                          className="btn-primary"
-                        >
-                          Get Started
-                        </Link>
-          </div>
-        </div>
-      </div>
+      
+      
     </div>
   );
 };

@@ -71,19 +71,19 @@ const AnalyzerPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white pt-20">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="mobile-container max-w-7xl mx-auto mobile-section">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 text-cyan-50">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="mobile-hero-heading font-bold mb-4 text-cyan-50">
             Resume Analyzer
           </h1>
-          <p className="text-cyan-200/70 text-lg">
+          <p className="text-cyan-200/70 mobile-text sm:text-lg">
             Get AI-powered insights for your resume
           </p>
         </div>
 
         {/* Input Section */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Resume Upload */}
           <Card className="bg-white/5 backdrop-blur-sm border-cyan-500/10">
             <CardHeader>
@@ -93,7 +93,7 @@ const AnalyzerPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed border-cyan-500/20 rounded-xl p-8 text-center hover:border-cyan-400/50 transition-all">
+              <div className="border-2 border-dashed border-cyan-500/20 rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:border-cyan-400/50 transition-all">
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx"
@@ -142,11 +142,11 @@ const AnalyzerPage = () => {
         )}
 
         {/* Analyze Button */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <button
             onClick={handleAnalyze}
             disabled={isAnalyzing || !resumeFile || !jobDescription.trim()}
-            className="px-8 py-4 bg-cyan-500 rounded-xl text-white font-medium text-lg hover:bg-cyan-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
+            className="mobile-button bg-cyan-500 rounded-xl text-white font-medium hover:bg-cyan-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto px-6 py-4 sm:px-8 sm:py-4"
           >
             {isAnalyzing ? (
               <>
@@ -160,6 +160,16 @@ const AnalyzerPage = () => {
               </>
             )}
           </button>
+          {isAnalyzing && (
+            <div className="mt-4 text-center">
+              <div className="text-cyan-200/70 text-sm mb-2">
+                Processing your resume... Please wait
+              </div>
+              <div className="w-64 mx-auto bg-cyan-500/20 rounded-full h-2">
+                <div className="bg-cyan-500 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Results Section */}

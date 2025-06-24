@@ -21,8 +21,17 @@ const ResetPassword = () => {
   const [tokenValid, setTokenValid] = useState(false);
 
   useEffect(() => {
+    console.log('🔍 ResetPassword component mounted');
+    console.log('🔍 Current URL:', window.location.href);
+    console.log('🔍 Current pathname:', window.location.pathname);
+    console.log('🔍 URL search params:', window.location.search);
+    console.log('🔍 Token from params:', token);
+    console.log('🔍 Token length:', token?.length);
+    console.log('🔍 All URL params:', Object.fromEntries(new URLSearchParams(window.location.search)));
+
     // Validate token by checking if it's provided in the URL params (from email link) or not
     if (!token) {
+      console.error('❌ No token found in URL parameters');
       setError('Invalid or missing reset token. Please request a new password reset link.');
       setValidatingToken(false);
       return;
@@ -30,13 +39,25 @@ const ResetPassword = () => {
 
     const validateTokenWithBackend = async () => {
       try {
-        console.log('Validating token:', token);
-        const response = await api.get(`/api/auth/validate-reset-token/${token}`);
-        console.log('Token validation successful:', response.data);
+        console.log('🔄 Validating token with backend:', token);
+        const response = await api.get(`/auth/validate-reset-token/${token}`);
+        console.log('✅ Token validation successful:', response.data);
         setTokenValid(true);
       } catch (error) {
-        console.error('Token validation error:', error);
-        setError('Invalid or expired token. Please request a new password reset link.');
+        console.error('❌ Token validation error:', error);
+        console.error('❌ Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+
+        if (error.response?.status === 404) {
+          setError('Token validation endpoint not found. Please contact support.');
+        } else if (error.response?.status === 400) {
+          setError('Invalid or expired token. Please request a new password reset link.');
+        } else {
+          setError('Unable to validate reset token. Please try again or request a new link.');
+        }
         setTokenValid(false);
       } finally {
         setValidatingToken(false);
@@ -144,8 +165,8 @@ const ResetPassword = () => {
   // Show loading state while validating token
   if (validatingToken) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4 pt-20">
+        <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 my-4">
           <CardContent className="flex justify-center items-center p-8">
             <div className="text-cyan-100">Validating reset token...</div>
           </CardContent>
@@ -155,8 +176,8 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 pt-20">
+      <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 my-4">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-cyan-100">
             Reset Your Password

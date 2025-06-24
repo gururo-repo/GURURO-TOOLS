@@ -2,10 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+:root {
+  --font-space-grotesk: 'Space Grotesk', sans-serif;
+  --font-inter: 'Inter', sans-serif;
 }
 
+@layer base {
+  body {
+    @apply antialiased;
+  }
+
+  :root {
+    /* Light theme variables */
+    --bg-primary: 250 250 250; /* #fafafa */
+    --bg-surface: 255 255 255; /* #ffffff */
+    --bg-card: 248 249 255; /* #f8f9ff */
+    --text-primary: 31 41 55; /* #1f2937 */
+    --text-secondary: 107 114 128; /* #6b7280 */
+    --border-color: 229 231 235; /* #e5e7eb */
+    --primary-color: 0 255 255; /* #00ffff - cyan */
+  }
+
+  .dark {
+    /* Dark theme variables */
+    --bg-primary: 10 10 15; /* #0a0a0f */
+    --bg-surface: 26 26 37; /* #1a1a25 */
+    --bg-card: 42 42 53; /* #2a2a35 */
+    --text-primary: 255 255 255; /* #ffffff */
+    --text-secondary: 160 160 160; /* #a0a0a0 */
+    --border-color: 51 51 74; /* #33334a */
+    --primary-color: 0 255 255; /* #00ffff - cyan */
+  }
+
+  body {
+    background: rgb(var(--bg-primary));
+    color: rgb(var(--text-primary));
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  }
+}
+
+/* Legacy shadcn variables for compatibility */
 @layer base {
   :root {
     --background: 0 0% 3.9%;
@@ -35,6 +72,42 @@ body {
   }
 }
 
+/* Neural network background animation */
+@layer components {
+  .neural-bg {
+    background:
+      radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(0, 255, 255, 0.08) 0%, transparent 50%);
+  }
+
+  .glass-card {
+    background: rgba(var(--bg-surface), 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--border-color), 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .glow-effect {
+    box-shadow: 0 0 20px rgba(var(--primary-color), 0.3);
+  }
+
+  .hero-title-shadow {
+    text-shadow: 0 6px 32px rgba(0,0,0,0.25), 0 1.5px 0 rgba(0,0,0,0.08);
+  }
+
+  .glass-card-modern {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(200,200,200,0.18);
+  }
+}
+
+.dark .glass-card-modern {
+  background: rgba(30,34,54,0.45);
+  border: 1px solid rgba(80,80,120,0.18);
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -45,6 +118,63 @@ body {
 }
 
 @layer utilities {
+  /* Mobile-first responsive utilities */
+  .mobile-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .mobile-section {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8;
+  }
+
+  .mobile-text {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .mobile-heading {
+    @apply text-xl sm:text-2xl lg:text-3xl xl:text-4xl;
+  }
+
+  .mobile-hero-heading {
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl;
+  }
+
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  .mobile-button {
+    @apply px-4 py-3 sm:px-6 sm:py-3 text-sm sm:text-base font-medium rounded-lg transition-all duration-200 touch-target;
+  }
+
+  .mobile-input {
+    @apply w-full px-3 py-3 sm:px-4 sm:py-3 text-sm sm:text-base rounded-lg border focus:ring-2 focus:ring-opacity-50 transition-all;
+  }
+
+  /* Mobile navigation utilities */
+  .mobile-nav-item {
+    @apply block px-4 py-3 text-base font-medium transition-colors duration-200 touch-target;
+  }
+
+  .mobile-dropdown {
+    @apply absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50;
+  }
+
+  /* Responsive spacing */
+  .mobile-spacing-y {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+
+  .mobile-spacing-x {
+    @apply space-x-4 sm:space-x-6 lg:space-x-8;
+  }
+
+  /* Original utilities */
   .gradient {
     @apply bg-gradient-to-b from-cyan-400 via-gray-200 to-cyan-600;
   }
@@ -59,6 +189,77 @@ body {
   }
   .shadow-glow-green {
     box-shadow: 0 0 8px 2px rgba(34, 197, 94, 0.5);
+  }
+
+  /* New gradient utilities */
+  .bg-gradient-primary {
+    @apply bg-gradient-to-r from-cyan-400 to-cyan-600;
+  }
+}
+
+/* Animations */
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin 18s linear infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.18s ease;
+}
+
+/* Neural Network Background Animation */
+.neural-network {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.neural-node {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(0, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: neuralPulse 3s ease-in-out infinite;
+}
+
+.neural-connection {
+  position: absolute;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+  animation: neuralFlow 4s ease-in-out infinite;
+}
+
+@keyframes neuralPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes neuralFlow {
+  0%, 100% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(20px);
   }
 }
 

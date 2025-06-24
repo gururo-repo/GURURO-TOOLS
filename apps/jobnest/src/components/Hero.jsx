@@ -16,30 +16,30 @@ const Hero = () => {
       <div className="space-y-6 text-center">
         <div className="space-y-6 mx-auto">
           <h1 className="text-4xl font-bold md:text-5xl lg:text-6xl xl:text-7xl gradient-title animate-gradient-x">
-            Land Dream Job & Bridge Skill Gaps with
+              Land Dream Job & Bridge Skill Gaps with
             <br/>AI-Powered Assistance!
-          </h1>
+            </h1>
           <p className="mx-auto max-w-[800px] text-muted-foreground md:text-2xl text-cyan-50">
           Get AI-powered job matches, personalized skill-building, and real-time career insights.
-          </p>
-        </div>
+            </p>
+          </div>
         <div className="flex justify-center space-x-4">
-          <button 
-            onClick={handleGetStarted}
+            <button
+              onClick={handleGetStarted}
             className="inline-block px-12 py-4 text-white font-bold bg-cyan-600 hover:bg-cyan-700 rounded-full shadow-lg transition duration-200" 
-          >
-            Get Started
-          </button>
-        </div>
+            >
+              Get Started
+            </button>
+          </div>
         <div className="hero-image-wrapper mt-5 md:mt-0">
           
-            <img
-              src={banner}
-              width={1280}
-              height={720}
-              alt="Dashboard Preview"
+              <img
+                src={banner}
+                width={1280}
+                height={720}
+                alt="Dashboard Preview"
               className="rounded-lg shadow-2xl border mx-auto"
-            />
+              />
           
         </div>
       </div>

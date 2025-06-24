@@ -119,6 +119,20 @@ const ProfileEdit = () => {
       setSuccess('');
       const token = localStorage.getItem('token');
 
+      // Get the current user data to compare changes
+      const currentUserData = JSON.parse(localStorage.getItem('userData') || '{}');
+      const countryChanged = currentUserData.country !== formData.country;
+      const industryChanged = currentUserData.industry !== formData.industry || currentUserData.subIndustry !== formData.subIndustry;
+
+      console.log('Profile update changes detected:', {
+        countryChanged,
+        industryChanged,
+        oldCountry: currentUserData.country,
+        newCountry: formData.country,
+        oldIndustry: currentUserData.industry,
+        newIndustry: formData.industry
+      });
+
       // First, update the user profile
       const profileResponse = await api.put('/users/profile', formData, {
         headers: {
@@ -132,21 +146,60 @@ const ProfileEdit = () => {
       // Show success message
       setSuccess('Profile updated successfully! Generating new insights...');
 
+      // Clear ALL cached insights data completely when country or industry changes
+      if (countryChanged || industryChanged) {
+        try {
+          // Clear localStorage insights
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          if (userData.insights) {
+            delete userData.insights;
+          }
+          if (userData.lastInsightsUpdate) {
+            delete userData.lastInsightsUpdate;
+          }
+          localStorage.setItem('userData', JSON.stringify(userData));
+
+          // Clear sessionStorage insights
+          sessionStorage.removeItem('industryInsights');
+          sessionStorage.removeItem('insightData');
+          sessionStorage.removeItem('comparisonData');
+          sessionStorage.removeItem('comparisonInputs');
+
+          // Clear localStorage comparison data as well
+          localStorage.removeItem('comparisonData');
+          localStorage.removeItem('comparisonInputs');
+
+          console.log('🧹 Cleared all cached insights and comparison data due to profile changes');
+        } catch (e) {
+          console.error('Error clearing cache:', e);
+        }
+      }
+
       // Force timestamp to prevent caching
       const timestamp = new Date().getTime();
 
       // After updating profile, generate new insights with all relevant profile data
       setInsightsLoading(true);
-      const insightResponse = await api.post(`/api/industry-insights/generate?t=${timestamp}`, {
+      // Prepare insight generation data with detailed logging
+      const insightData = {
         industry: formData.subIndustry || formData.industry,
-        subIndustry: formData.subIndustry,  // Explicitly include subIndustry
+        subIndustry: formData.subIndustry,
         experience: parseInt(formData.experience) || 0,
         skills: formData.skills,
         country: formData.country,
         salaryExpectation: formData.salaryExpectation,
         isIndianData: formData.country.toLowerCase().includes('india'),
-        forceRefresh: true  // Add a flag for the backend to force refresh
-      }, {
+        forceRefresh: true,
+        clearCache: countryChanged || industryChanged, // Signal backend to clear cache
+        profileUpdateTimestamp: timestamp
+      };
+
+      console.log('🔄 Generating insights with data:', insightData);
+      console.log('🌍 Country:', formData.country);
+      console.log('🇮🇳 Is Indian Data:', insightData.isIndianData);
+      console.log('🔄 Force cache clear:', countryChanged || industryChanged);
+
+      const insightResponse = await api.post(`/industry-insights/generate?t=${timestamp}&clearCache=${countryChanged || industryChanged}`, insightData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -154,6 +207,23 @@ const ProfileEdit = () => {
       });
 
       console.log('New insights generated:', insightResponse.data);
+
+      // Debug: Check if the backend returned country-specific data
+      if (insightResponse.data.citySalaryData) {
+        console.log('🏙️ Cities in response:', insightResponse.data.citySalaryData.map(city => city.city));
+        console.log('🌍 Expected country:', formData.country);
+
+        // Check if we're still getting Indian cities for non-Indian countries
+        const indianCities = ['Bangalore', 'Mumbai', 'Delhi', 'Noida', 'Pune', 'Chennai', 'Hyderabad'];
+        const responseCities = insightResponse.data.citySalaryData.map(city => city.city);
+        const hasIndianCities = responseCities.some(city => indianCities.includes(city));
+
+        if (hasIndianCities && !formData.country.toLowerCase().includes('india')) {
+          console.warn('⚠️ Backend returned Indian cities for non-Indian country!');
+          console.warn('Expected country:', formData.country);
+          console.warn('Received cities:', responseCities);
+        }
+      }
 
       // Update local storage with new user data and timestamp
       const updatedUserData = {
@@ -170,8 +240,21 @@ const ProfileEdit = () => {
         subIndustry: formData.subIndustry
       }));
 
-      // Navigate back to insights page
-      navigate('/dashboard/industry-insights');
+      // Navigate back to insights page with fresh data
+      console.log('🔄 Navigating to insights page with fresh data');
+
+      // Wait a moment for the insights to be fully processed
+      setTimeout(() => {
+        // Use navigate with state to indicate fresh data is available
+        navigate('/industry-insights', {
+          replace: true,
+          state: {
+            freshInsights: true,
+            timestamp: timestamp,
+            profileUpdated: true
+          }
+        });
+      }, 1000); // Give backend time to process
     } catch (error) {
       console.error('Error updating profile:', error);
       setError('Failed to update profile. Please try again.');
@@ -379,7 +462,7 @@ const ProfileEdit = () => {
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              onClick={() => navigate('/dashboard/industry-insights')}
+              onClick={() => navigate('/industry-insights')}
               className="bg-zinc-600 hover:bg-zinc-700 text-white py-2 px-6 rounded-lg"
             >
               Cancel

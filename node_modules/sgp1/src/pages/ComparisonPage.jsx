@@ -356,7 +356,7 @@ const ComparisonPage = () => {
                     <div className="bg-yellow-900/30 border border-yellow-800 text-yellow-200 p-4 rounded-lg mb-4">
                       <p className="font-medium">
                         {comparisonData._meta?.message ||
-                         "Note: Some comparison data is incomplete or missing. We're showing all available information."}
+                         "Note: Some comparison data is missing. We're showing all available information."}
                       </p>
                       <p className="mt-2 text-sm">
                         This may happen when comparing unusual role and country combinations or during high server load.

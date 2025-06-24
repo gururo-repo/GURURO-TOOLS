@@ -9,47 +9,19 @@ import IndustryInsightsPage from './IndustryInsightsPage';
 
 const LandingPage = () => {
 
-
-  const steps = [
-    {
-      number: "1",
-      title: "Take a quick competency test",
-      description: "Complete a comprehensive skills assessment"
-    },
-    {
-      number: "2",
-      title: "AI analyzes your skills",
-      description: "Get detailed insights about your capabilities vs market needs"
-    },
-    {
-      number: "3",
-      title: "Get recommendations",
-      description: "Receive personalized job and course suggestions"
-    },
-    {
-      number: "4",
-      title: "Track progress & apply",
-      description: "Monitor your growth and apply to matching positions"
-    }
-  ];
-
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Grid Background */}
+      <div className="grid-background"></div>
+
+      {/* Hero Section with integrated Features */}
       <Hero/>
       
 
       {/* Features Section */}
       <Features/>
 
-      {/* How It Works Section */}
-      <HowItWorksSection/>
-
-      {/* Stats Section */}
-      <StatsSection/>
-
-      {/* Footer */}
-      {/* <Footer/> */}
+      
     </div>
   );
 };

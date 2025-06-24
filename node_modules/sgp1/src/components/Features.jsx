@@ -37,36 +37,42 @@ const Features = () => {
   ];
 
   return (
-    <section className="py-16 bg-black">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-cyan-100">Features That Set Us Apart</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-cyan-50">
-            Our AI-powered platform helps you navigate your career journey with confidence.
+    <section className="relative mobile-section bg-gradient-to-b from-black via-gray-900 to-black neural-bg">
+      <div className="mobile-container relative z-10">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16 animate-fade-in">
+          <h2 className="mobile-heading font-bold mb-6 text-cyan-100 hero-title-shadow">
+            Features That Set Us Apart
+          </h2>
+          <p className="mobile-text sm:text-lg lg:text-xl text-cyan-200 max-w-3xl mx-auto leading-relaxed">
+            Our AI-powered platform helps you navigate your career journey with confidence and precision.
           </p>
         </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-        {features.map((feature, index) => (
-          <Card
-            key={index}
-            className="border transform  duration-500 shadow-lg rounded-2xl hover:bg-transparent
-    hover:scale-105 hover:shadow-2xl hover:shadow-cyan-400 hover:border-cyan-400 hover:border-2 h-60 w-auto"
-          >
-            <CardContent className="pt-6 text-center flex flex-row items-center">
-              <div className="flex flex-col items-center justify-center color-cyan-50">
-                {feature.icon}
-                <h3 className="text-xl font-bold mb-2 text-cyan-100 pt-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-cyan-50 pt-2">
-                  {feature.description}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <div className="mobile-grid max-w-7xl mx-auto">
+          {features.map((feature, index) => (
+            <Card
+              key={feature.title}
+              className="glass-card-modern border-cyan-400/20 transform duration-500 shadow-lg rounded-2xl hover:scale-105 hover:shadow-2xl hover:shadow-cyan-400/50 hover:border-cyan-400/50 hover:border-2 h-auto min-h-[240px] sm:min-h-[260px] w-auto group animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <CardContent className="p-4 sm:p-6 text-center flex flex-col items-center justify-center h-full">
+                <div className="flex flex-col items-center justify-center text-cyan-50 space-y-3 sm:space-y-4">
+                  <div className="mb-2 transform group-hover:scale-110 transition-transform duration-300">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-cyan-100 text-center group-hover:text-cyan-300 transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-cyan-200 text-center leading-relaxed group-hover:text-cyan-100 transition-colors duration-300">
+                    {feature.description}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
   )
 }
 

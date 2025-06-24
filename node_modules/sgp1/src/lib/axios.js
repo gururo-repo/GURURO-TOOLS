@@ -24,6 +24,8 @@ const api = axios.create({
   timeout: 60000, // Increased timeout to 60 seconds for Gemini AI calls
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   },
   // Add withCredentials to handle cookies properly
   withCredentials: true,
@@ -36,6 +38,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Add headers to potentially bypass CSRF for auth routes
+    if (config.url?.includes('/auth/')) {
+      config.headers['X-Requested-With'] = 'XMLHttpRequest';
+      config.headers['Accept'] = 'application/json';
+    }
+
     console.log('🚀 Making API request:', {
       method: config.method?.toUpperCase(),
       url: config.url,
@@ -69,26 +78,45 @@ api.interceptors.response.use(
       data: error.response?.data,
       message: error.message
     });
-    return Promise.reject(error);
-  }
-);
 
-// Add a response interceptor to handle common errors
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
     // Check for specific error conditions
     if (error.response?.status === 401) {
       // Unauthorized - token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
-
     }
 
     return Promise.reject(error);
   }
 );
+
+// Special function for authentication requests that might bypass CSRF
+export const authRequest = async (method, url, data = null) => {
+  try {
+    console.log('🔐 Making auth request:', { method, url, data: data ? 'present' : 'none' });
+
+    const config = {
+      method,
+      url: `${baseURL}${url}`,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      withCredentials: true,
+    };
+
+    if (data) {
+      config.data = data;
+    }
+
+    const response = await axios(config);
+    console.log('✅ Auth request successful:', response.data);
+    return response;
+  } catch (error) {
+    console.error('❌ Auth request failed:', error);
+    throw error;
+  }
+};
 
 export default api;

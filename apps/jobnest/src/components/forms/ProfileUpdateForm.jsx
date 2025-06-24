@@ -64,7 +64,7 @@ const ProfileUpdateForm = ({ onUpdate, initialData }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await api.put('/api/users/profile', formData, {
+      const response = await api.put('/users/profile', formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

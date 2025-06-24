@@ -11,6 +11,9 @@ import ComparisonPage from './pages/ComparisonPage';
 import CompetencyTest from './pages/CompetencyTest';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
+import DebugConnection from './components/DebugConnection';
+import ResetPasswordDebug from './components/ResetPasswordDebug';
+
 
 import './index.css';
 
@@ -25,6 +28,9 @@ function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/reset-debug/:token" element={<ResetPasswordDebug />} />
+          <Route path="/debug" element={<DebugConnection />} />
+
 
           {/* Protected routes */}
           <Route

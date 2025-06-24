@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { ArrowRight, Clock, CheckCircle, AlertCircle, Loader } from "lucide-react"
+import api from "../../lib/axios"
 
 
 const CompetencyQuiz = () => {
@@ -22,14 +23,42 @@ const CompetencyQuiz = () => {
   useEffect(() => {
     const getQuiz = async () => {
       if (!categoryId || !subIndustry) {
+        console.log('Missing categoryId or subIndustry, redirecting to categories');
         navigate("/competency-test/categories")
         return
       }
 
       try {
         setLoading(true)
-        const response = await api.get(`/api/quiz/${categoryId}/${subIndustry}`)
+        setError(null)
+
+        console.log('🔄 Fetching quiz data:', {
+          categoryId,
+          subIndustry,
+          apiUrl: `/quiz/${categoryId}/${subIndustry}`
+        });
+
+        const token = localStorage.getItem('token');
+        const response = await api.get(`/quiz/${categoryId}/${subIndustry}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        console.log('✅ Quiz data received:', response.data);
         const data = response.data
+
+        // Validate the response data
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error('No quiz questions received from server');
+        }
+
+        // Validate each question has required fields
+        const invalidQuestions = data.filter(q => !q.question || !q.options || !Array.isArray(q.options));
+        if (invalidQuestions.length > 0) {
+          console.error('Invalid questions found:', invalidQuestions);
+          throw new Error('Some quiz questions are missing required data');
+        }
 
         const formattedQuestions = data.map((q, index) => ({
           id: `q${index + 1}`,
@@ -47,8 +76,57 @@ const CompetencyQuiz = () => {
         })
         setTimeLeft(900)
         setLoading(false)
+
+        console.log('✅ Quiz initialized successfully with', formattedQuestions.length, 'questions');
       } catch (error) {
-        setError("Failed to load quiz. Please try again.")
+        console.error('❌ Failed to load quiz:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+
+        let errorMessage = "Failed to load quiz. Please try again.";
+
+        if (error.response?.status === 404) {
+          // Try to get available quiz combinations
+          try {
+            const availableResponse = await api.get('/quiz/available', {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+              }
+            });
+
+            const availableCombinations = availableResponse.data;
+            console.log('Available quiz combinations:', availableCombinations);
+
+            // Check if there are any quizzes available for this category
+            const categoryQuizzes = availableCombinations.filter(combo =>
+              combo.category.toLowerCase() === categoryId.toLowerCase()
+            );
+
+            if (categoryQuizzes.length > 0) {
+              const availableSubIndustries = categoryQuizzes.map(combo => combo.subIndustry).join(', ');
+              errorMessage = `Quiz not found for "${subIndustry}" in ${categoryId} category. Available options: ${availableSubIndustries}`;
+            } else {
+              errorMessage = `No quizzes available for ${categoryId} category yet. Please try a different category.`;
+            }
+          } catch (availableError) {
+            console.error('Failed to fetch available quizzes:', availableError);
+            errorMessage = `Quiz not found for "${subIndustry}" in ${categoryId} category. This combination may not be available yet.`;
+          }
+        } else if (error.response?.status === 401) {
+          errorMessage = "Authentication required. Please log in again.";
+          localStorage.removeItem('token');
+          navigate('/auth');
+          return;
+        } else if (error.response?.status >= 500) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (error.message.includes('No quiz questions')) {
+          errorMessage = `No quiz questions available for ${subIndustry} in ${categoryId} category.`;
+        }
+
+        setError(errorMessage);
         setLoading(false)
       }
     }

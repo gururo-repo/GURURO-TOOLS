@@ -1,12 +1,23 @@
 import axios from 'axios'
 
+// Debug all environment variables
+console.log('🔍 Resume Refiner Environment Debug:', {
+  VITE_API_URL: import.meta.env.VITE_API_URL,
+  VITE_JOBNEST_API_URL: import.meta.env.VITE_JOBNEST_API_URL,
+  VITE_RESUME_API_URL: import.meta.env.VITE_RESUME_API_URL,
+  NODE_ENV: import.meta.env.NODE_ENV,
+  PROD: import.meta.env.PROD,
+  MODE: import.meta.env.MODE
+})
+
 // API URL configuration for different environments
-const API_BASE_URL = import.meta.env.VITE_API_URL ||
+const API_BASE_URL = import.meta.env.VITE_RESUME_API_URL ||
+  import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD
     ? '/resume-refiner/api'  // Use Vercel proxy in production
     : 'http://localhost:5000/api')
 
-console.log('API Base URL:', API_BASE_URL) // Debug log
+console.log('🚀 Resume Refiner API Base URL:', API_BASE_URL) // Debug log
 
 const API = axios.create({ 
   baseURL: API_BASE_URL,
@@ -14,7 +25,7 @@ const API = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  timeout: 60000, // 60 second timeout
+  timeout: 120000, // 60 second timeout
   withCredentials: true
 })
 
@@ -93,8 +104,22 @@ export const analyzeResume = async (resumeFile, jobDescription) => {
     }
 
     // Validate job description length (minimum 20 characters as per backend)
-    if (jobDescription.trim().length < 20) {
-      throw new Error('Job description must be at least 20 characters long')
+    // Enhanced job description validation
+    if (jobDescription.trim().length < 50) {
+      throw new Error('Job description must be at least 50 characters long')
+    }
+
+    // Check if job description contains job-related keywords
+    const jobDescLower = jobDescription.toLowerCase()
+    const jobKeywords = [
+      'position', 'role', 'job', 'responsibilities', 'duties', 'requirements',
+      'qualifications', 'skills', 'experience', 'candidate', 'seeking',
+      'hiring', 'employment', 'vacancy', 'opportunity'
+    ]
+
+    const hasJobKeywords = jobKeywords.some(keyword => jobDescLower.includes(keyword))
+    if (!hasJobKeywords) {
+      throw new Error('Please provide a valid job description with role information and requirements')
     }
 
     const formData = new FormData()

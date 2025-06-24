@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { useGoogleLogin, googleLogout } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
 import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 import { Card, CardHeader, CardContent, CardTitle, CardFooter } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import api from '../lib/axios';
+import api, { authRequest } from '../lib/axios';
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -14,10 +14,7 @@ const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [codeVerifier, setCodeVerifier] = useState(() => {
-    // Try to get code verifier from localStorage
-    return localStorage.getItem('codeVerifier') || '';
-  });
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -103,7 +100,15 @@ const AuthPage = () => {
 
       console.log(`Sending ${isLogin ? 'login' : 'register'} request to ${endpoint}`);
 
-      const response = await api.post(endpoint, payload);
+      // Try the special auth request first to bypass potential CSRF issues
+      let response;
+      try {
+        response = await authRequest('POST', endpoint, payload);
+      } catch (authError) {
+        console.warn('Auth request failed, trying regular API:', authError);
+        // Fallback to regular API request
+        response = await api.post(endpoint, payload);
+      }
       const { data } = response;
 
       // Handle successful authentication
@@ -134,40 +139,7 @@ const AuthPage = () => {
     }
   };
 
-  // Handle Google login success with authorization code flow
-  const handleGoogleSuccess = async (codeResponse) => {
-    try {
-      setLoading(true);
-      setError(null);
-      console.log('Google response:', codeResponse); // Debug log
 
-      // Exchange the code for tokens
-      const tokenResponse = await api.post('/auth/google-token', {
-        code: codeResponse.code,
-        code_verifier: codeVerifier,
-        redirect_uri: window.location.origin + '/jobnest/auth'
-      });
-
-      // Handle successful authentication
-      handleAuthSuccess(tokenResponse.data);
-    } catch (error) {
-      console.error('Google login error:', error);
-
-      // More detailed error logging
-      if (error.response) {
-        console.error('Error response data:', error.response.data);
-      }
-
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        'Google authentication failed. Please try again.';
-
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
   // Common function to handle successful authentication
   const handleAuthSuccess = (data) => {
     // Save token and user data
@@ -192,39 +164,55 @@ const AuthPage = () => {
 
 
 
-  // Helper function to generate a random code verifier
-  const generateCodeVerifier = () => {
-    const array = new Uint8Array(56);
-    window.crypto.getRandomValues(array);
-    return Array.from(array, (byte) =>
-      ('0' + (byte & 0xFF).toString(16)).slice(-2)
-    ).join('');
+
+
+  // Handle Google OAuth success
+  const handleGoogleOAuthSuccess = async (tokenResponse) => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('Google OAuth success:', tokenResponse);
+
+      // Send the access token to backend for verification
+      const response = await api.post('/auth/google', {
+        access_token: tokenResponse.access_token,
+        isLogin: isLogin
+      });
+
+      console.log('Backend Google auth response:', response.data);
+      handleAuthSuccess(response.data);
+    } catch (error) {
+      console.error('Google authentication error:', error);
+
+      // Handle specific error cases
+      if (error.response?.status === 404) {
+        setError('Google authentication is not yet configured on the server. Please use email/password login for now.');
+      } else {
+        setError(error.response?.data?.message || 'Google authentication failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Update the googleLogin configuration to use redirect flow instead of popup
+  // Simplified Google OAuth configuration using popup flow
   const googleLogin = useGoogleLogin({
-    onSuccess: handleGoogleSuccess,
+    onSuccess: (tokenResponse) => {
+      handleGoogleOAuthSuccess(tokenResponse);
+    },
     onError: (error) => {
       console.error('Google Login Failed:', error);
       setError('Google login failed. Please try another method.');
       setLoading(false);
     },
-    flow: 'auth-code', // Using authorization code flow
-    scope: 'email profile',
-    ux_mode: 'redirect', // Changed from popup to redirect to avoid COOP issues
-    redirect_uri: window.location.origin + '/jobnest/auth', // Redirect back to the auth page
-    state: isLogin ? 'login' : 'register', // Pass login state through the OAuth flow
-    onNonOAuthError: (error) => {
-      console.error('Non-OAuth Error:', error);
-      setError('Authentication initialization failed. Please try again.');
-    }
+    scope: 'email profile'
   });
 
 
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 pt-20">
+      <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 my-4">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-cyan-100">
             {isLogin ? 'Welcome Back!' : 'Create an Account'}
@@ -236,11 +224,6 @@ const AuthPage = () => {
             variant="outline"
             className="w-full border-zinc-700 hover:bg-zinc-800 mb-6"
             onClick={() => {
-              // Generate and store a new code verifier before login
-              const newCodeVerifier = generateCodeVerifier();
-              // Store in state and localStorage for redirect flow
-              setCodeVerifier(newCodeVerifier);
-              localStorage.setItem('codeVerifier', newCodeVerifier);
               googleLogin();
             }}
             disabled={loading}
@@ -261,12 +244,13 @@ const AuthPage = () => {
           <form onSubmit={handleManualAuth} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-cyan-100">Name</label>
+                <label htmlFor="name" className="text-sm font-medium text-cyan-100">Name</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FaUser className="text-zinc-500" />
                   </div>
                   <Input
+                    id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
@@ -279,12 +263,13 @@ const AuthPage = () => {
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-cyan-100">Email</label>
+              <label htmlFor="email" className="text-sm font-medium text-cyan-100">Email</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaEnvelope className="text-zinc-500" />
                 </div>
                 <Input
+                  id="email"
                   name="email"
                   type="email"
                   value={formData.email}
@@ -297,12 +282,13 @@ const AuthPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-cyan-100">Password</label>
+              <label htmlFor="password" className="text-sm font-medium text-cyan-100">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaLock className="text-zinc-500" />
                 </div>
                 <Input
+                  id="password"
                   name="password"
                   type="password"
                   value={formData.password}
@@ -327,12 +313,13 @@ const AuthPage = () => {
 
             {!isLogin && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-cyan-100">Confirm Password</label>
+                <label htmlFor="confirmPassword" className="text-sm font-medium text-cyan-100">Confirm Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FaLock className="text-zinc-500" />
                   </div>
                   <Input
+                    id="confirmPassword"
                     name="confirmPassword"
                     type="password"
                     value={formData.confirmPassword}
